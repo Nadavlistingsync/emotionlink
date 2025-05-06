@@ -11,6 +11,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const router = useRouter();
 
   // Check Supabase connection on component mount
@@ -33,6 +34,7 @@ export default function Login() {
     e.preventDefault();
     setError(null);
     setLoading(true);
+    setIsRedirecting(false);
     
     if (!email || !password) {
       setError('Please enter both email and password');
@@ -60,15 +62,18 @@ export default function Login() {
       }
 
       toast.dismiss(loadingToast);
-      toast.success('Login successful! Redirecting...');
+      toast.success('Login successful!');
       
-      // Add a small delay before redirect to show the success message
-      setTimeout(() => {
-        router.push('/');
-      }, 1000);
+      // Set redirecting state
+      setIsRedirecting(true);
+      
+      // Force a hard navigation to the home page
+      window.location.href = '/';
+      
     } catch (error: any) {
       console.error('Login error:', error);
       toast.dismiss(loadingToast);
+      setIsRedirecting(false);
       
       // Handle specific error cases
       if (error.message.includes('Invalid login credentials')) {
@@ -115,7 +120,7 @@ export default function Login() {
                 placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                disabled={loading}
+                disabled={loading || isRedirecting}
               />
             </div>
             <div>
@@ -132,7 +137,7 @@ export default function Login() {
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                disabled={loading}
+                disabled={loading || isRedirecting}
               />
             </div>
           </div>
@@ -140,10 +145,10 @@ export default function Login() {
           <div>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || isRedirecting}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? 'Signing in...' : isRedirecting ? 'Redirecting...' : 'Sign in'}
             </button>
           </div>
         </form>
