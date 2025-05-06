@@ -1,34 +1,40 @@
 import { NextResponse } from 'next/server';
-import OpenAI from 'openai';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
 
 export async function POST(request: Request) {
   try {
-    const { message, emotion, intensity } = await request.json();
-
-    const prompt = `You are an empathetic therapist chatbot. The user is currently feeling ${emotion} with an intensity of ${intensity * 100}%. 
-    They have sent you the following message: "${message}"
+    const supabase = createRouteHandlerClient({ cookies });
     
-    Please respond in a supportive and understanding way, taking into account their current emotional state. 
-    Keep your response concise and focused on emotional support.`;
+    // Check if user is authenticated
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !session) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
 
-    const completion = await openai.chat.completions.create({
-      messages: [{ role: 'user', content: prompt }],
-      model: 'gpt-3.5-turbo',
-      temperature: 0.7,
-      max_tokens: 150,
-    });
+    const { message } = await request.json();
 
-    return NextResponse.json({
-      response: completion.choices[0].message.content,
-    });
+    if (!message) {
+      return NextResponse.json(
+        { error: 'Message is required' },
+        { status: 400 }
+      );
+    }
+
+    // Here you would integrate with your AI service
+    // For now, we'll return a simple response
+    const response = {
+      message: `I understand you're saying: "${message}". As an AI therapist, I'm here to help you explore your thoughts and feelings. Could you tell me more about what's on your mind?`
+    };
+
+    return NextResponse.json(response);
   } catch (error) {
-    console.error('Error in chat route:', error);
+    console.error('Chat API error:', error);
     return NextResponse.json(
-      { error: 'Failed to process chat message' },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }

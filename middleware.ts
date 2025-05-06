@@ -13,14 +13,11 @@ export async function middleware(req: NextRequest) {
       }
     );
 
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.getSession();
+    // Refresh session if expired
+    const { data: { session }, error } = await supabase.auth.getSession();
 
     if (error) {
       console.error('Middleware auth error:', error);
-      // If there's an auth error, redirect to login
       return NextResponse.redirect(new URL('/login', req.url));
     }
 
@@ -29,18 +26,20 @@ export async function middleware(req: NextRequest) {
       hasSession: !!session,
     });
 
-    // If user is not signed in and the current path is not /login or /signup
-    // redirect the user to /login
-    if (!session && !['/login', '/signup'].includes(req.nextUrl.pathname)) {
+    // Public routes that don't require authentication
+    const publicRoutes = ['/login', '/signup'];
+    const isPublicRoute = publicRoutes.includes(req.nextUrl.pathname);
+
+    // If user is not signed in and trying to access protected routes
+    if (!session && !isPublicRoute) {
       console.log('No session, redirecting to login');
       return NextResponse.redirect(new URL('/login', req.url));
     }
 
-    // If user is signed in and the current path is /login or /signup
-    // redirect the user to /
-    if (session && ['/login', '/signup'].includes(req.nextUrl.pathname)) {
-      console.log('Has session, redirecting to home');
-      return NextResponse.redirect(new URL('/', req.url));
+    // If user is signed in and trying to access auth pages
+    if (session && isPublicRoute) {
+      console.log('Has session, redirecting to dashboard');
+      return NextResponse.redirect(new URL('/dashboard', req.url));
     }
 
     // If user is a therapist and trying to access /therapist
@@ -52,14 +51,13 @@ export async function middleware(req: NextRequest) {
         .single();
 
       if (user?.role !== 'therapist') {
-        return NextResponse.redirect(new URL('/', req.url));
+        return NextResponse.redirect(new URL('/dashboard', req.url));
       }
     }
 
     return res;
   } catch (error) {
     console.error('Middleware error:', error);
-    // On error, redirect to login
     return NextResponse.redirect(new URL('/login', req.url));
   }
 }
