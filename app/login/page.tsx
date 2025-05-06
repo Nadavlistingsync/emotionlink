@@ -18,22 +18,38 @@ export default function Login() {
     setError(null);
     setLoading(true);
     toast.loading('Logging in...');
+    
+    console.log('Login attempt with:', { email });
+    
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
+      console.log('Supabase Key exists:', !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) throw error;
+      console.log('Login response:', { data, error });
+
+      if (error) {
+        console.error('Login error details:', error);
+        throw error;
+      }
+
+      if (!data?.user) {
+        throw new Error('No user data returned');
+      }
+
       toast.dismiss();
       toast.success('Login successful! Redirecting...');
-      console.log('Login successful, redirecting...');
+      console.log('Login successful, user:', data.user);
       router.push('/');
     } catch (error: any) {
+      console.error('Login error:', error);
       toast.dismiss();
       toast.error(error.message || 'Login failed');
       setError(error.message);
-      console.error('Login error:', error);
     } finally {
       setLoading(false);
     }
