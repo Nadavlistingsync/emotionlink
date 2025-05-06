@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { toast } from 'react-hot-toast';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -16,7 +17,7 @@ export default function Login() {
     e.preventDefault();
     setError(null);
     setLoading(true);
-
+    toast.loading('Logging in...');
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -24,10 +25,15 @@ export default function Login() {
       });
 
       if (error) throw error;
+      toast.dismiss();
+      toast.success('Login successful! Redirecting...');
       console.log('Login successful, redirecting...');
       router.push('/');
     } catch (error: any) {
+      toast.dismiss();
+      toast.error(error.message || 'Login failed');
       setError(error.message);
+      console.error('Login error:', error);
     } finally {
       setLoading(false);
     }
