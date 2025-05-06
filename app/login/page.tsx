@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -13,27 +13,45 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  // Check Supabase connection on component mount
+  useEffect(() => {
+    const checkConnection = async () => {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error('Supabase connection error:', error);
+          toast.error('Connection error. Please try again later.');
+        }
+      } catch (err) {
+        console.error('Error checking connection:', err);
+      }
+    };
+    checkConnection();
+  }, []);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
-    toast.loading('Logging in...');
     
-    console.log('Login attempt with:', { email });
+    if (!email || !password) {
+      setError('Please enter both email and password');
+      setLoading(false);
+      return;
+    }
+
+    const loadingToast = toast.loading('Logging in...');
     
     try {
-      console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
-      console.log('Supabase Key exists:', !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+      console.log('Attempting login with:', { email });
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      console.log('Login response:', { data, error });
-
       if (error) {
-        console.error('Login error details:', error);
+        console.error('Login error:', error);
         throw error;
       }
 
@@ -41,15 +59,28 @@ export default function Login() {
         throw new Error('No user data returned');
       }
 
-      toast.dismiss();
+      toast.dismiss(loadingToast);
       toast.success('Login successful! Redirecting...');
-      console.log('Login successful, user:', data.user);
-      router.push('/');
+      
+      // Add a small delay before redirect to show the success message
+      setTimeout(() => {
+        router.push('/');
+      }, 1000);
     } catch (error: any) {
       console.error('Login error:', error);
-      toast.dismiss();
-      toast.error(error.message || 'Login failed');
-      setError(error.message);
+      toast.dismiss(loadingToast);
+      
+      // Handle specific error cases
+      if (error.message.includes('Invalid login credentials')) {
+        toast.error('Invalid email or password');
+        setError('Invalid email or password');
+      } else if (error.message.includes('Email not confirmed')) {
+        toast.error('Please verify your email first');
+        setError('Please verify your email first');
+      } else {
+        toast.error(error.message || 'Login failed');
+        setError(error.message || 'Login failed');
+      }
     } finally {
       setLoading(false);
     }
@@ -84,6 +115,7 @@ export default function Login() {
                 placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={loading}
               />
             </div>
             <div>
@@ -100,6 +132,7 @@ export default function Login() {
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={loading}
               />
             </div>
           </div>
