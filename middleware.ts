@@ -10,6 +10,11 @@ export async function middleware(req: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession();
 
+  console.log('MIDDLEWARE DEBUG:', {
+    path: req.nextUrl.pathname,
+    session,
+  });
+
   // If user is not signed in and the current path is not /login or /signup
   // redirect the user to /login
   if (!session && !['/login', '/signup'].includes(req.nextUrl.pathname)) {
