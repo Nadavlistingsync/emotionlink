@@ -1,0 +1,29 @@
+{
+  "data": [
+    {
+      "emotion": "Calm",
+      "intensity": 0.2,
+      "timestamp": "2024-05-05T12:00:00Z"
+    },
+    {
+      "emotion": "Anxious",
+      "intensity": 0.6,
+      "timestamp": "2024-05-05T12:05:00Z"
+    },
+    {
+      "emotion": "Stressed",
+      "intensity": 0.8,
+      "timestamp": "2024-05-05T12:10:00Z"
+    },
+    {
+      "emotion": "Focused",
+      "intensity": 0.4,
+      "timestamp": "2024-05-05T12:15:00Z"
+    },
+    {
+      "emotion": "Calm",
+      "intensity": 0.3,
+      "timestamp": "2024-05-05T12:20:00Z"
+    }
+  ]
+} 
