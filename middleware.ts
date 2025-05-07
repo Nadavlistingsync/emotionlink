@@ -21,9 +21,12 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(new URL('/login', req.url));
     }
 
+    // Add detailed session logging
     console.log('Middleware session check:', {
       path: req.nextUrl.pathname,
       hasSession: !!session,
+      sessionId: session?.user?.id,
+      sessionExpiry: session?.expires_at,
     });
 
     // Public routes that don't require authentication
@@ -32,13 +35,16 @@ export async function middleware(req: NextRequest) {
 
     // If user is not signed in and trying to access protected routes
     if (!session && !isPublicRoute) {
-      console.log('No session, redirecting to login');
-      return NextResponse.redirect(new URL('/login', req.url));
+      console.log('No session, redirecting to login from:', req.nextUrl.pathname);
+      const redirectUrl = new URL('/login', req.url);
+      // Add the original path as a query parameter
+      redirectUrl.searchParams.set('redirectTo', req.nextUrl.pathname);
+      return NextResponse.redirect(redirectUrl);
     }
 
     // If user is signed in and trying to access auth pages
     if (session && isPublicRoute) {
-      console.log('Has session, redirecting to dashboard');
+      console.log('Has session, redirecting to dashboard from:', req.nextUrl.pathname);
       return NextResponse.redirect(new URL('/dashboard', req.url));
     }
 

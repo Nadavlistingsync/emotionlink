@@ -59,11 +59,23 @@ export default function Login() {
         throw new Error('No user data returned');
       }
 
+      // Verify session was created
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        console.error('Session verification failed:', sessionError);
+        throw new Error('Failed to create session');
+      }
+
+      console.log('Login successful, session created:', !!session);
+      
       toast.dismiss(loadingToast);
       toast.success('Login successful!');
       
-      // Use router.push instead of window.location
-      router.push('/dashboard');
+      // Use router.push with a small delay to ensure session is set
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 100);
       
     } catch (error: any) {
       console.error('Login error:', error);
