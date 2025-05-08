@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { createSupabaseBrowserClient } from '@/lib/supabaseClient';
 import { MoodEntry, ChatLog } from "@/lib/supabase";
 import { toast } from "react-hot-toast";
+import mockEEG from '@/data/mockEEG.json';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -110,6 +111,21 @@ export default function Home() {
     };
     saveMoodEntry();
   }, [emotion]);
+
+  // Mock EEG streaming logic
+  useEffect(() => {
+    let idx = 0;
+    const interval = setInterval(() => {
+      if (idx < mockEEG.length) {
+        const entry = mockEEG[idx];
+        setEmotion({ emotion: entry.Emotion, intensity: 0.5 }); // You can adjust intensity logic as needed
+        idx++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 5000); // every 5 seconds
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const fetchEmotion = async () => {
