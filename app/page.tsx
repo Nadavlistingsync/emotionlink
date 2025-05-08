@@ -67,11 +67,21 @@ export default function Home() {
   // Save mood entry when emotion changes
   useEffect(() => {
     const saveMoodEntry = async () => {
-      if (!emotion) return;
-
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
+      if (!emotion) {
+        console.log('Skipping save: no emotion');
+        return;
+      }
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (!user || userError) {
+        console.log('Skipping save: no user or error', { user, userError });
+        return;
+      }
+      // Only save if emotion has both fields and user is authenticated
+      if (!emotion.emotion || typeof emotion.intensity !== 'number') {
+        console.log('Skipping save: invalid emotion object', emotion);
+        return;
+      }
+      console.log('Saving mood entry', { userId: user.id, emotion });
       const { error } = await supabase
         .from('mood_entries')
         .insert([
@@ -81,12 +91,11 @@ export default function Home() {
             intensity: emotion.intensity,
           },
         ]);
-
       if (error) {
         toast.error('Failed to save mood entry');
+        console.error('Failed to save mood entry', error);
         return;
       }
-
       // Update mood history
       setMoodHistory(prev => [
         {
@@ -99,7 +108,6 @@ export default function Home() {
         ...prev.slice(0, 4),
       ]);
     };
-
     saveMoodEntry();
   }, [emotion]);
 
