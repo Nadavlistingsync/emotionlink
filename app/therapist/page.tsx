@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { createSupabaseBrowserClient } from '@/lib/supabaseClient';
 import { User, MoodEntry, ChatLog, TherapistNote } from '@/lib/supabase';
 import { toast } from 'react-hot-toast';
 import { Line } from 'react-chartjs-2';
@@ -25,6 +25,8 @@ ChartJS.register(
   Tooltip,
   Legend
 );
+
+const supabase = createSupabaseBrowserClient();
 
 export default function TherapistDashboard() {
   const [users, setUsers] = useState<User[]>([]);

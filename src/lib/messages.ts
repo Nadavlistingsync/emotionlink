@@ -1,4 +1,6 @@
-import { supabase } from './supabase';
+import { createSupabaseBrowserClient } from './supabaseClient';
+
+const supabase = createSupabaseBrowserClient();
 
 export type Message = {
   userId: string;

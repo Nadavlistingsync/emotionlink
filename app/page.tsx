@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { supabase } from "@/lib/supabase";
+import { createSupabaseBrowserClient } from '@/lib/supabaseClient';
 import { MoodEntry, ChatLog } from "@/lib/supabase";
 import { toast } from "react-hot-toast";
 
@@ -10,6 +10,8 @@ interface Message {
   content: string;
   timestamp: number;
 }
+
+const supabase = createSupabaseBrowserClient();
 
 export default function Home() {
   const [emotion, setEmotion] = useState<{ emotion: string; intensity: number } | null>(null);
