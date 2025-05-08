@@ -93,7 +93,7 @@ export default function Home() {
         ]);
       if (error) {
         toast.error('Failed to save mood entry');
-        console.error('Failed to save mood entry', error);
+        console.error('Failed to save mood entry', JSON.stringify(error, null, 2));
         return;
       }
       // Update mood history
