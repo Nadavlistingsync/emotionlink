@@ -70,6 +70,7 @@ export async function updateUser(userId: string, updates: Partial<User>) {
 }
 
 export async function getPatients(therapistId: string) {
+  const supabase = createSupabaseServerClient();
   const { data, error } = await supabase
     .from('users')
     .select('*')
