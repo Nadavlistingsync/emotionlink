@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { createSupabaseServerClient } from './supabaseClient';
 
 export type User = {
   id: string;
@@ -8,6 +8,7 @@ export type User = {
 };
 
 export async function createUser(userId: string, email: string, role: User['role'] = 'user') {
+  const supabase = createSupabaseServerClient();
   try {
     const { data, error } = await supabase
       .from('users')
@@ -38,6 +39,7 @@ export async function createUser(userId: string, email: string, role: User['role
 }
 
 export async function getUser(userId: string) {
+  const supabase = createSupabaseServerClient();
   const { data, error } = await supabase
     .from('users')
     .select('*')
@@ -52,6 +54,7 @@ export async function getUser(userId: string) {
 }
 
 export async function updateUser(userId: string, updates: Partial<User>) {
+  const supabase = createSupabaseServerClient();
   const { data, error } = await supabase
     .from('users')
     .update(updates)

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { createSupabaseBrowserClient } from '@/lib/supabaseClient';
 import { createUser } from '@/lib/users';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
@@ -13,6 +13,7 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [lastAttemptedEmail, setLastAttemptedEmail] = useState<string | null>(null);
+  const supabase = createSupabaseBrowserClient();
 
   // Handle countdown timer
   useEffect(() => {
