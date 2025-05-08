@@ -3,69 +3,56 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export async function middleware(req: NextRequest) {
-  try {
-    const res = NextResponse.next();
-    const supabase = createMiddlewareClient(
-      { req, res },
-      {
-        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      }
-    );
+  // Always use the same response object throughout
+  let res = NextResponse.next();
 
-    // Refresh session if expired
-    const { data: { session }, error } = await supabase.auth.getSession();
+  // Create Supabase client with req and res
+  const supabase = createMiddlewareClient({ req, res });
 
-    if (error) {
-      console.error('Middleware auth error:', error);
-      return NextResponse.redirect(new URL('/login', req.url));
-    }
+  // This will update the response with any new cookies
+  const { data: { session }, error } = await supabase.auth.getSession();
 
-    // Add detailed session logging
-    console.log('Middleware session check:', {
-      path: req.nextUrl.pathname,
-      hasSession: !!session,
-      sessionId: session?.user?.id,
-      sessionExpiry: session?.expires_at,
+  // Public routes that don't require authentication
+  const publicRoutes = ['/login', '/signup'];
+  const isPublicRoute = publicRoutes.includes(req.nextUrl.pathname);
+
+  // If user is not signed in and trying to access protected routes
+  if (!session && !isPublicRoute) {
+    const redirectUrl = new URL('/login', req.url);
+    redirectUrl.searchParams.set('redirectTo', req.nextUrl.pathname);
+    const redirectRes = NextResponse.redirect(redirectUrl);
+    // Copy cookies from the original response
+    res.cookies.getAll().forEach(cookie => {
+      redirectRes.cookies.set(cookie);
     });
+    return redirectRes;
+  }
 
-    // Public routes that don't require authentication
-    const publicRoutes = ['/login', '/signup'];
-    const isPublicRoute = publicRoutes.includes(req.nextUrl.pathname);
+  // If user is signed in and trying to access auth pages
+  if (session && isPublicRoute) {
+    const dashboardUrl = new URL('/dashboard', req.url);
+    const redirectRes = NextResponse.redirect(dashboardUrl);
+    res.cookies.getAll().forEach(cookie => {
+      redirectRes.cookies.set(cookie);
+    });
+    return redirectRes;
+  }
 
-    // If user is not signed in and trying to access protected routes
-    if (!session && !isPublicRoute) {
-      console.log('No session, redirecting to login from:', req.nextUrl.pathname);
-      const redirectUrl = new URL('/login', req.url);
-      // Add the original path as a query parameter
-      redirectUrl.searchParams.set('redirectTo', req.nextUrl.pathname);
-      return NextResponse.redirect(redirectUrl);
-    }
+  // If user is a therapist and trying to access /therapist
+  if (session && req.nextUrl.pathname.startsWith('/therapist')) {
+    const { data: user } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', session.user.id)
+      .single();
 
-    // If user is signed in and trying to access auth pages
-    if (session && isPublicRoute) {
-      console.log('Has session, redirecting to dashboard from:', req.nextUrl.pathname);
+    if (user?.role !== 'therapist') {
       return NextResponse.redirect(new URL('/dashboard', req.url));
     }
-
-    // If user is a therapist and trying to access /therapist
-    if (session && req.nextUrl.pathname.startsWith('/therapist')) {
-      const { data: user } = await supabase
-        .from('users')
-        .select('role')
-        .eq('id', session.user.id)
-        .single();
-
-      if (user?.role !== 'therapist') {
-        return NextResponse.redirect(new URL('/dashboard', req.url));
-      }
-    }
-
-    return res;
-  } catch (error) {
-    console.error('Middleware error:', error);
-    return NextResponse.redirect(new URL('/login', req.url));
   }
+
+  // Always return the response object you passed to Supabase
+  return res;
 }
 
 // Specify which routes this middleware should run on
