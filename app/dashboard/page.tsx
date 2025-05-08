@@ -11,14 +11,19 @@ export default function Dashboard() {
 
   useEffect(() => {
     const checkSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (!session || error) {
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        console.log('Dashboard: getUser result', { user, error });
+        if (!user || error) {
+          router.push('/login');
+        } else {
+          setIsLoading(false);
+        }
+      } catch (err) {
+        console.error('Dashboard: getUser threw error', err);
         router.push('/login');
-      } else {
-        setIsLoading(false);
       }
     };
-
     checkSession();
   }, [router, supabase]);
 
