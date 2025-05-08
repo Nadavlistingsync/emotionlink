@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabaseClient';
-import { createUser } from '@/lib/users';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 
@@ -55,8 +54,16 @@ export default function SignUp() {
 
       if (data.user?.id && data.user?.email) {
         try {
-          // Create user profile in the users table
-          await createUser(data.user.id, data.user.email);
+          // Create user profile in the users table via API route
+          const res = await fetch('/api/users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: data.user.id, email: data.user.email }),
+          });
+          if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.error || 'Failed to create user profile. Please try again.');
+          }
           console.log('User profile created successfully');
           toast.success('Account created successfully! Please check your email to verify your account.');
         } catch (profileError: any) {
