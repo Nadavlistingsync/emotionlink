@@ -73,9 +73,9 @@ export default function Login() {
       toast.dismiss(loadingToast);
       toast.success('Login successful!');
       
-      // Use router.push with a small delay to ensure session is set
+      // Use window.location.href to force a full reload and sync cookies
       setTimeout(() => {
-        router.push('/dashboard');
+        window.location.href = '/dashboard';
       }, 100);
       
     } catch (error: any) {
