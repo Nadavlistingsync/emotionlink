@@ -6,11 +6,23 @@ export async function middleware(req: NextRequest) {
   // Always use the same response object throughout
   let res = NextResponse.next();
 
+  // Log all cookies for debugging
+  console.log('All cookies:', req.cookies.getAll());
+
   // Create Supabase client with req and res
   const supabase = createMiddlewareClient({ req, res });
 
   // This will update the response with any new cookies
   const { data: { session }, error } = await supabase.auth.getSession();
+
+  // Log session for debugging
+  console.log('Middleware session check:', {
+    path: req.nextUrl.pathname,
+    hasSession: !!session,
+    sessionId: session?.user?.id,
+    sessionExpiry: session?.expires_at,
+    error,
+  });
 
   // Public routes that don't require authentication
   const publicRoutes = ['/login', '/signup'];
