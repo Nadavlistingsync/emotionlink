@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from './supabaseServerClient';
+import { createSupabaseServerClient } from '../lib/supabaseServerClient';
 
 export type User = {
   id: string;
