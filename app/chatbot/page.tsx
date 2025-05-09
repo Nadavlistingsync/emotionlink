@@ -47,13 +47,17 @@ export default function Chatbot() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: input }),
+        body: JSON.stringify({ 
+          message: input,
+          emotion: 'Anxious', // Mocked for now
+          intensity: 0.49     // Mocked for now
+        }),
       });
 
       if (!response.ok) throw new Error('Failed to get response');
 
       const data = await response.json();
-      const assistantMessage: Message = { role: 'assistant', content: data.message };
+      const assistantMessage: Message = { role: 'assistant', content: data.response };
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
       console.error('Error:', error);
