@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabaseServerClient';
+import OpenAI from 'openai';
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 export async function POST(request: Request) {
   try {
@@ -29,10 +34,26 @@ export async function POST(request: Request) {
       );
     }
 
-    // Here you would integrate with your AI service
-    // For now, we'll return a simple response
-    const responseText = `I understand you're saying: "${message}". As an AI therapist, I'm here to help you explore your thoughts and feelings. Could you tell me more about what's on your mind?`;
-    const response = { response: responseText };
+    // Build the prompt for OpenAI
+    const prompt = `You are an empathetic therapist chatbot. The user is currently feeling ${emotion} with an intensity of ${(intensity * 100).toFixed(0)}%.
+They have sent you the following message: "${message}"
+Your goals:
+- Respond in a supportive, understanding, and non-judgmental way.
+- Reference their current emotion and intensity.
+- Ask gentle follow-up questions to help them open up.
+- Offer actionable advice or coping strategies if appropriate.
+- Keep your response concise and focused on emotional support.
+- If the user seems in distress, encourage them to reach out to a trusted person or professional.`;
+
+    const completion = await openai.chat.completions.create({
+      messages: [{ role: 'user', content: prompt }],
+      model: 'gpt-3.5-turbo',
+      temperature: 0.7,
+      max_tokens: 150,
+    });
+
+    const aiResponse = completion.choices[0].message.content;
+    const response = { response: aiResponse };
     console.log('[API/chat] Response:', response);
     return NextResponse.json(response);
   } catch (error) {
