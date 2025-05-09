@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabaseClient';
 import { EEGProvider, useEEG } from '@/lib/interpretEEG';
+import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -14,6 +15,7 @@ function ChatbotInner() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [emotionHistory, setEmotionHistory] = useState<{emotion: string, intensity: number, timestamp: string}[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
@@ -33,6 +35,20 @@ function ChatbotInner() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  useEffect(() => {
+    setEmotionHistory((prev) => [
+      ...prev.slice(-19), // keep last 20
+      { ...emotionState }
+    ]);
+  }, [emotionState]);
+
+  const averageIntensity = (emotionHistory.reduce((sum, e) => sum + e.intensity, 0) / (emotionHistory.length || 1)).toFixed(2);
+  const mostFrequentEmotion = (() => {
+    const freq: Record<string, number> = {};
+    emotionHistory.forEach(e => { freq[e.emotion] = (freq[e.emotion] || 0) + 1; });
+    return Object.entries(freq).sort((a, b) => b[1] - a[1])[0]?.[0] || '-';
+  })();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,6 +94,25 @@ function ChatbotInner() {
       <div className="max-w-3xl mx-auto">
         <div className="bg-white rounded-lg shadow-lg p-8">
           <h2 className="text-2xl font-bold mb-6 text-center">AI Chatbot</h2>
+
+          {/* Analytics Section */}
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold mb-2">Emotion Trends</h3>
+            <ResponsiveContainer width="100%" height={200}>
+              <LineChart data={emotionHistory} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="timestamp" tick={false} />
+                <YAxis domain={[0, 1]} />
+                <Tooltip formatter={(value: any) => (typeof value === 'number' ? (value * 100).toFixed(0) + '%' : value)} />
+                <Line type="monotone" dataKey="intensity" stroke="#8884d8" dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+            <div className="mt-2 flex gap-8">
+              <span>Average Intensity: <b>{(averageIntensity * 100).toFixed(0)}%</b></span>
+              <span>Most Frequent Emotion: <b>{mostFrequentEmotion}</b></span>
+            </div>
+          </div>
+
           <div className="h-96 overflow-y-auto mb-4 bg-gray-100 rounded-lg p-4">
             {messages.map((msg, idx) => (
               <div key={idx} className={`mb-2 flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
