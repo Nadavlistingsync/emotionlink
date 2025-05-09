@@ -3,19 +3,21 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabaseClient';
+import { EEGProvider, useEEG } from '@/lib/interpretEEG';
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
 }
 
-export default function Chatbot() {
+function ChatbotInner() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
+  const emotionState = useEEG();
 
   useEffect(() => {
     const checkSession = async () => {
@@ -49,8 +51,8 @@ export default function Chatbot() {
         },
         body: JSON.stringify({ 
           message: input,
-          emotion: 'Anxious', // Mocked for now
-          intensity: 0.49     // Mocked for now
+          emotion: emotionState.emotion,
+          intensity: emotionState.intensity
         }),
       });
 
@@ -106,5 +108,13 @@ export default function Chatbot() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Chatbot() {
+  return (
+    <EEGProvider>
+      <ChatbotInner />
+    </EEGProvider>
   );
 } 

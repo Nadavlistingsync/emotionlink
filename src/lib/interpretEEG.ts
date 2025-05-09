@@ -1,4 +1,4 @@
-import sampleEEG from '@/data/sampleEEG.json';
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 
 export type EmotionState = {
   emotion: string;
@@ -6,27 +6,35 @@ export type EmotionState = {
   timestamp: string;
 };
 
-export function getCurrentEmotion(): EmotionState {
-  // In a real app, this would analyze real-time EEG data
-  // For now, we'll simulate by cycling through our sample data
-  const now = new Date();
-  const data = sampleEEG.data;
-  
-  // Get the most recent entry before current time
-  const currentEntry = data.reduce((prev, curr) => {
-    const prevTime = new Date(prev.timestamp).getTime();
-    const currTime = new Date(curr.timestamp).getTime();
-    const nowTime = now.getTime();
-    
-    if (currTime <= nowTime && currTime > prevTime) {
-      return curr;
-    }
-    return prev;
-  }, data[0]);
+const EMOTIONS = ['Calm', 'Anxious', 'Stressed', 'Focused'];
 
+function getRandomEmotion(): EmotionState {
+  const emotion = EMOTIONS[Math.floor(Math.random() * EMOTIONS.length)];
+  const intensity = Math.random();
   return {
-    emotion: currentEntry.emotion,
-    intensity: currentEntry.intensity,
-    timestamp: currentEntry.timestamp
+    emotion,
+    intensity,
+    timestamp: new Date().toISOString(),
   };
+}
+
+const EEGContext = createContext<EmotionState | undefined>(undefined);
+
+export function EEGProvider({ children }: { children: ReactNode }) {
+  const [emotionState, setEmotionState] = useState<EmotionState>(getRandomEmotion());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setEmotionState(getRandomEmotion());
+    }, 5000); // update every 5 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  return <EEGContext.Provider value={emotionState}>{children}</EEGContext.Provider>;
+}
+
+export function useEEG() {
+  const context = useContext(EEGContext);
+  if (!context) throw new Error('useEEG must be used within an EEGProvider');
+  return context;
 } 
