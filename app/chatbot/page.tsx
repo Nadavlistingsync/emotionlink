@@ -90,33 +90,34 @@ function ChatbotInner() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <h2 className="text-2xl font-bold mb-6 text-center">AI Chatbot</h2>
+        <div className="bg-white rounded-2xl shadow-2xl p-8 border border-gray-100">
+          <h2 className="text-3xl font-extrabold mb-8 text-center text-blue-700 tracking-tight drop-shadow">AI Chatbot</h2>
 
           {/* Analytics Section */}
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold mb-2">Emotion Trends</h3>
+          <div className="mb-10 bg-gradient-to-r from-blue-100 via-purple-100 to-pink-100 rounded-xl p-6 shadow-inner">
+            <h3 className="text-lg font-semibold mb-4 text-purple-700">Emotion Trends</h3>
             <ResponsiveContainer width="100%" height={200}>
               <LineChart data={emotionHistory} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="timestamp" tick={false} />
                 <YAxis domain={[0, 1]} />
                 <Tooltip formatter={(value: any) => (typeof value === 'number' ? (value * 100).toFixed(0) + '%' : value)} />
-                <Line type="monotone" dataKey="intensity" stroke="#8884d8" dot={false} />
+                <Line type="monotone" dataKey="intensity" stroke="#7c3aed" dot={false} strokeWidth={3} />
               </LineChart>
             </ResponsiveContainer>
-            <div className="mt-2 flex gap-8">
-              <span>Average Intensity: <b>{(averageIntensity * 100).toFixed(0)}%</b></span>
-              <span>Most Frequent Emotion: <b>{mostFrequentEmotion}</b></span>
+            <div className="mt-4 flex gap-8 justify-center text-base">
+              <span className="text-blue-700">Average Intensity: <b>{(averageIntensity * 100).toFixed(0)}%</b></span>
+              <span className="text-purple-700">Most Frequent Emotion: <b>{mostFrequentEmotion}</b></span>
             </div>
           </div>
 
-          <div className="h-96 overflow-y-auto mb-4 bg-gray-100 rounded-lg p-4">
+          {/* Chat UI */}
+          <div className="h-96 overflow-y-auto mb-6 bg-gray-50 rounded-lg p-4 border border-gray-200 shadow-inner focus:outline-none">
             {messages.map((msg, idx) => (
               <div key={idx} className={`mb-2 flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`px-4 py-2 rounded-lg ${msg.role === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-900'}`}>
+                <div className={`px-4 py-2 rounded-xl shadow ${msg.role === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-900'} focus:ring-2 focus:ring-blue-400`} tabIndex={0} aria-label={msg.role === 'user' ? 'User message' : 'Assistant message'}>
                   {msg.content}
                 </div>
               </div>
@@ -126,15 +127,16 @@ function ChatbotInner() {
           <form onSubmit={handleSubmit} className="flex space-x-2">
             <input
               type="text"
-              className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
               placeholder="Type your message..."
               value={input}
               onChange={e => setInput(e.target.value)}
               disabled={isLoading}
+              aria-label="Type your message"
             />
             <button
               type="submit"
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 font-semibold shadow"
               disabled={isLoading}
             >
               {isLoading ? 'Sending...' : 'Send'}
