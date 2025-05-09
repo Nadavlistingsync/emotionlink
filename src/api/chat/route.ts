@@ -9,11 +9,9 @@ export async function POST(request: Request) {
   try {
     const { message, emotion, intensity } = await request.json();
 
-    const prompt = `You are an empathetic therapist chatbot. The user is currently feeling ${emotion} with an intensity of ${intensity * 100}%. 
-    They have sent you the following message: "${message}"
-    
-    Please respond in a supportive and understanding way, taking into account their current emotional state. 
-    Keep your response concise and focused on emotional support.`;
+    const prompt = `You are an empathetic therapist chatbot. The user is currently feeling ${emotion} with an intensity of ${(intensity * 100).toFixed(0)}%.\n
+    They have sent you the following message: "${message}"\n
+    Your goals:\n- Respond in a supportive, understanding, and non-judgmental way.\n- Reference their current emotion and intensity.\n- Ask gentle follow-up questions to help them open up.\n- Offer actionable advice or coping strategies if appropriate.\n- Keep your response concise and focused on emotional support.\n- If the user seems in distress, encourage them to reach out to a trusted person or professional.\n`;
 
     const completion = await openai.chat.completions.create({
       messages: [{ role: 'user', content: prompt }],
