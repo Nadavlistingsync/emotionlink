@@ -1,4 +1,4 @@
-import { getCurrentEmotion } from './interpretEEG';
+import { getCurrentEmotion } from './interpretEEG.tsx';
 
 describe('getCurrentEmotion', () => {
   it('should return the most recent emotion state', () => {

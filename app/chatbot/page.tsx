@@ -44,7 +44,7 @@ function ChatbotInner() {
     ]);
   }, [emotionState]);
 
-  const averageIntensity = (emotionHistory.reduce((sum, e) => sum + e.intensity, 0) / (emotionHistory.length || 1)).toFixed(2);
+  const averageIntensity = emotionHistory.reduce((sum, e) => sum + e.intensity, 0) / (emotionHistory.length || 1);
   const mostFrequentEmotion = (() => {
     const freq: Record<string, number> = {};
     emotionHistory.forEach(e => { freq[e.emotion] = (freq[e.emotion] || 0) + 1; });
