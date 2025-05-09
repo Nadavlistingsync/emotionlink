@@ -20,6 +20,7 @@ function ChatbotInner() {
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
   const emotionState = useEEG();
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -58,6 +59,7 @@ function ChatbotInner() {
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
+    setError(null);
 
     try {
       const response = await fetch('/api/chat', {
@@ -77,8 +79,9 @@ function ChatbotInner() {
       const data = await response.json();
       const assistantMessage: Message = { role: 'assistant', content: data.response };
       setMessages(prev => [...prev, assistantMessage]);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error:', error);
+      setError(error.message || 'Sorry, I encountered an error. Please try again.');
       const errorMessage: Message = {
         role: 'assistant',
         content: 'Sorry, I encountered an error. Please try again.',
@@ -94,6 +97,13 @@ function ChatbotInner() {
       <div className="max-w-3xl mx-auto">
         <div className="bg-white rounded-2xl shadow-2xl p-8 border border-gray-100">
           <h2 className="text-3xl font-extrabold mb-8 text-center text-blue-700 tracking-tight drop-shadow">AI Chatbot</h2>
+
+          {error && (
+            <div className="mb-6 p-4 bg-red-100 border border-red-300 text-red-800 rounded-lg flex items-center justify-between" role="alert">
+              <span>{error}</span>
+              <button onClick={() => setError(null)} className="ml-4 px-2 py-1 bg-red-200 rounded hover:bg-red-300 focus:outline-none focus:ring-2 focus:ring-red-400">Dismiss</button>
+            </div>
+          )}
 
           {/* Analytics Section */}
           <div className="mb-10 bg-gradient-to-r from-blue-100 via-purple-100 to-pink-100 rounded-xl p-6 shadow-inner">
