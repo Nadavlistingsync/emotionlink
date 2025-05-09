@@ -9,6 +9,9 @@ A Next.js application that helps users track and understand their emotions using
 - AI-powered emotion interpretation
 - Secure API endpoints
 - Real-time updates
+- **Live mock EEG data simulation**
+- **Emotion trend analytics and insights**
+- **Automatic error feedback loop**
 
 ## Tech Stack
 
@@ -49,6 +52,15 @@ npm run dev
 ## Deployment
 
 The application is configured for deployment on Vercel. Simply connect your GitHub repository to Vercel and set up the environment variables.
+
+## Production & Scaling Best Practices
+
+- **Environment Variables:** Never commit secrets to the repo. Use Vercel's dashboard to securely manage environment variables.
+- **Error Monitoring:** Integrate a service like [Sentry](https://sentry.io/welcome/) for real-time error tracking and alerting in production.
+- **Scaling:** Vercel auto-scales serverless functions, but monitor usage and upgrade your plan if needed for high traffic.
+- **Performance:** Use Next.js image optimization and static generation where possible. Monitor cold starts for API routes.
+- **Security:** Always use HTTPS, keep dependencies up to date, and review Supabase policies for data protection.
+- **Feedback Loop:** The app includes a built-in error feedback loop for user and developer debugging.
 
 ## Contributing
 
