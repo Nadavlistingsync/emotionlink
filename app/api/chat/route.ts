@@ -11,11 +11,11 @@ export async function POST(request: Request) {
     console.log('[API/chat] Incoming request');
     const supabase = createSupabaseServerClient();
     
-    // Check if user is authenticated
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-    console.log('[API/chat] Session:', { session, sessionError });
-    if (sessionError || !session) {
-      console.warn('[API/chat] Unauthorized access attempt', { sessionError });
+    // Check if user is authenticated using getUser() for better security
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    console.log('[API/chat] User:', { user, userError });
+    if (userError || !user) {
+      console.warn('[API/chat] Unauthorized access attempt', { userError });
       return NextResponse.json(
         { response: '', error: 'Unauthorized' },
         { status: 401 }
