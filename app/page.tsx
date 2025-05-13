@@ -144,9 +144,9 @@ export default function Home() {
       <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm">
         <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl mx-auto">
           <div className="mb-4">
-            <h1 className="text-2xl font-bold text-gray-800">EmotionLink Chat</h1>
+            <h1 className="text-2xl font-bold text-black">EmotionLink Chat</h1>
             {emotion && (
-              <p className="text-gray-600">
+              <p className="text-black">
                 Current emotion: {emotion.emotion} (Intensity: {(emotion.intensity * 100).toFixed(0)}%)
               </p>
             )}
@@ -164,7 +164,7 @@ export default function Home() {
                   className={`inline-block p-3 rounded-lg ${
                     msg.role === 'user'
                       ? 'bg-blue-500 text-white'
-                      : 'bg-gray-200 text-gray-800'
+                      : 'bg-gray-200 text-black'
                   }`}
                 >
                   <p>{msg.content}</p>
