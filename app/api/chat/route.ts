@@ -1,27 +1,23 @@
 import { NextResponse } from 'next/server';
-import { createSupabaseServerClient } from '@/lib/supabaseServerClient';
 import OpenAI from 'openai';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+// Error feedback loop
+const logError = (error: any, context: string) => {
+  console.error(`[${context}] Error:`, {
+    message: error.message,
+    stack: error.stack,
+    timestamp: new Date().toISOString(),
+  });
+};
+
 export async function POST(request: Request) {
   try {
     console.log('[API/chat] Incoming request');
-    const supabase = createSupabaseServerClient();
     
-    // Check if user is authenticated using getUser() for better security
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    console.log('[API/chat] User:', { user, userError });
-    if (userError || !user) {
-      console.warn('[API/chat] Unauthorized access attempt', { userError });
-      return NextResponse.json(
-        { response: '', error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
     const body = await request.json();
     console.log('[API/chat] Request body:', body);
     const { message, emotion, intensity } = body;
@@ -30,6 +26,14 @@ export async function POST(request: Request) {
       console.warn('[API/chat] No message provided');
       return NextResponse.json(
         { response: '', error: 'Message is required' },
+        { status: 400 }
+      );
+    }
+
+    if (!emotion || !intensity) {
+      console.warn('[API/chat] Missing emotion data');
+      return NextResponse.json(
+        { response: '', error: 'Emotion data is required' },
         { status: 400 }
       );
     }
@@ -57,7 +61,7 @@ Your goals:
     console.log('[API/chat] Response:', response);
     return NextResponse.json(response);
   } catch (error) {
-    console.error('[API/chat] Chat API error:', error);
+    logError(error, 'API/chat');
     return NextResponse.json(
       { response: '', error: 'Internal server error' },
       { status: 500 }

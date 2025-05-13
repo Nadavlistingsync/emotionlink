@@ -1,26 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { createSupabaseBrowserClient } from '@/lib/supabaseClient';
+import { useState } from 'react';
 
 export default function EEGConnection() {
   const [isConnecting, setIsConnecting] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [deviceStatus, setDeviceStatus] = useState('Not Connected');
-  const router = useRouter();
-  const supabase = createSupabaseBrowserClient();
-
-  useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (!session || error) {
-        router.push('/login');
-      }
-    };
-
-    checkSession();
-  }, [router, supabase]);
 
   const handleConnect = async () => {
     setIsConnecting(true);

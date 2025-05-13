@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { createSupabaseBrowserClient } from '@/lib/supabaseClient';
 import { EEGProvider, useEEG } from '@/lib/interpretEEG';
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts';
 
@@ -17,21 +15,8 @@ function ChatbotInner() {
   const [isLoading, setIsLoading] = useState(false);
   const [emotionHistory, setEmotionHistory] = useState<{emotion: string, intensity: number, timestamp: string}[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
-  const supabase = createSupabaseBrowserClient();
   const emotionState = useEEG();
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (!session || error) {
-        router.push('/login');
-      }
-    };
-
-    checkSession();
-  }, [router, supabase]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -137,7 +122,7 @@ function ChatbotInner() {
           <form onSubmit={handleSubmit} className="flex space-x-2">
             <input
               type="text"
-              className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
+              className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-black"
               placeholder="Type your message..."
               value={input}
               onChange={e => setInput(e.target.value)}
