@@ -123,6 +123,7 @@ function ChatbotInner() {
             <input
               type="text"
               className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-black"
+              style={{ color: '#000' }}
               placeholder="Type your message..."
               value={input}
               onChange={e => setInput(e.target.value)}
