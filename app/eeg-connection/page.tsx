@@ -61,6 +61,34 @@ export default function EEGConnection() {
             </button>
           </div>
         </div>
+        <div className="mb-8 p-6 border rounded-lg bg-white shadow text-black text-base font-sans leading-relaxed">
+          <h2 className="font-bold mb-3 text-lg">EEG Device Compatibility & Connection Guide</h2>
+          <ul className="mb-3 list-disc ml-8 space-y-1">
+            <li><b>NeuroSky Mindwave:</b> Fully supported. <span className="text-green-700 font-semibold">Available</span></li>
+            <li><b>Muse:</b> Fully supported. <span className="text-green-700 font-semibold">Available</span></li>
+            <li><b>Naxon Explorer:</b> Fully supported. <span className="text-green-700 font-semibold">Available</span></li>
+            <li><b>DIY/Other:</b> Supported via custom script. <span className="text-green-700 font-semibold">Available</span></li>
+          </ul>
+          <div className="mb-3">
+            <b>How to Connect:</b>
+            <ol className="list-decimal ml-8 space-y-1">
+              <li>Select your EEG device in the main chat page.</li>
+              <li>Download and run the provided connection script for your device (see README or below).</li>
+              <li>Wait for the status to show <span className="text-green-700 font-semibold">Connected</span> (or check for live emotion updates in the chat).</li>
+              <li>Start chatting! The bot will use your live emotion data.</li>
+            </ol>
+          </div>
+          <div className="text-sm text-gray-700 mt-2">
+            <b>Scripts & Guides:</b>
+            <ul className="list-disc ml-6">
+              <li><a href="/scripts/neurosky-websocket.js" className="underline text-blue-700 font-semibold">NeuroSky WebSocket Script</a></li>
+              <li><a href="/scripts/muse-websocket.py" className="underline text-blue-700 font-semibold">Muse WebSocket Script</a></li>
+              <li><a href="/scripts/naxon-websocket.py" className="underline text-blue-700 font-semibold">Naxon WebSocket Script</a></li>
+              <li><a href="/scripts/diy-websocket.py" className="underline text-blue-700 font-semibold">DIY/Other WebSocket Script</a></li>
+            </ul>
+            Need more help? Contact support or see the README for detailed setup.
+          </div>
+        </div>
       </div>
     </div>
   );
