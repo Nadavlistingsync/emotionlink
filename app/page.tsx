@@ -10,6 +10,8 @@ interface Message {
   timestamp: number;
 }
 
+type EEGDevice = 'neurosky' | 'muse' | 'naxon' | 'diy';
+
 export default function Home() {
   const [emotion, setEmotion] = useState<{ emotion: string; intensity: number } | null>(null);
   const [message, setMessage] = useState<string>("");
@@ -17,8 +19,8 @@ export default function Home() {
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [eegDevice, setEegDevice] = useState('neurosky');
-  const deviceUrls = {
+  const [eegDevice, setEegDevice] = useState<EEGDevice>('neurosky');
+  const deviceUrls: Record<EEGDevice, string> = {
     neurosky: 'ws://localhost:8765',
     muse: 'ws://localhost:8766',
     naxon: 'ws://localhost:8767',
@@ -181,7 +183,7 @@ export default function Home() {
             <select
               id="eeg-device"
               value={eegDevice}
-              onChange={e => setEegDevice(e.target.value)}
+              onChange={e => setEegDevice(e.target.value as EEGDevice)}
               className="p-2 border rounded-lg"
             >
               <option value="neurosky">NeuroSky Mindwave</option>
