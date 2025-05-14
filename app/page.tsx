@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import { toast } from "react-hot-toast";
-import mockEEG from '@/data/mockEEG.json';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -44,21 +43,6 @@ export default function Home() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages]);
-
-  // Mock EEG streaming logic
-  useEffect(() => {
-    let idx = 0;
-    const interval = setInterval(() => {
-      if (idx < mockEEG.length) {
-        const entry = mockEEG[idx];
-        setEmotion({ emotion: entry.Emotion, intensity: 0.5 });
-        idx++;
-      } else {
-        clearInterval(interval);
-      }
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
 
   // Add WebSocket connection for EEG emotion data
   useEffect(() => {
