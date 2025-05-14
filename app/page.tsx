@@ -17,6 +17,13 @@ export default function Home() {
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [eegDevice, setEegDevice] = useState('neurosky');
+  const deviceUrls = {
+    neurosky: 'ws://localhost:8765',
+    muse: 'ws://localhost:8766',
+    naxon: 'ws://localhost:8767',
+    diy: 'ws://localhost:8768',
+  };
 
   // Load chat history from localStorage on initial render
   useEffect(() => {
@@ -53,7 +60,7 @@ export default function Home() {
 
   // Add WebSocket connection for EEG emotion data
   useEffect(() => {
-    const ws = new WebSocket('ws://localhost:8765');
+    const ws = new WebSocket(deviceUrls[eegDevice]);
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
@@ -66,7 +73,7 @@ export default function Home() {
     };
     ws.onerror = (err) => console.error('WebSocket error:', err);
     return () => ws.close();
-  }, []);
+  }, [eegDevice]);
 
   useEffect(() => {
     if (emotion) {
@@ -169,6 +176,21 @@ export default function Home() {
             )}
           </div>
           
+          <div className="mb-4">
+            <label htmlFor="eeg-device" className="mr-2 font-bold">EEG Device:</label>
+            <select
+              id="eeg-device"
+              value={eegDevice}
+              onChange={e => setEegDevice(e.target.value)}
+              className="p-2 border rounded-lg"
+            >
+              <option value="neurosky">NeuroSky Mindwave</option>
+              <option value="muse">Muse</option>
+              <option value="naxon">Naxon Explorer</option>
+              <option value="diy">DIY/Other</option>
+            </select>
+          </div>
+
           <div className="h-[500px] overflow-y-auto mb-4 border rounded-lg p-4 bg-gray-50">
             {chatMessages.map((msg, index) => (
               <div
