@@ -197,6 +197,17 @@ export default function Home() {
               <option value="naxon">Naxon Explorer</option>
               <option value="diy">DIY/Other</option>
             </select>
+            <div className="mt-2 text-blue-700 font-semibold">
+              Selected device: {(() => {
+                switch (eegDevice) {
+                  case 'neurosky': return 'NeuroSky Mindwave';
+                  case 'muse': return 'Muse';
+                  case 'naxon': return 'Naxon Explorer';
+                  case 'diy': return 'DIY/Other';
+                  default: return eegDevice;
+                }
+              })()}
+            </div>
           </div>
 
           <div className="h-[500px] overflow-y-auto mb-4 border rounded-lg p-4 bg-gray-50">
