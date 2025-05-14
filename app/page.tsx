@@ -178,6 +178,28 @@ export default function Home() {
             )}
           </div>
           
+          <div className="mb-4 p-4 border rounded-lg bg-gray-100">
+            <h2 className="font-bold mb-2">EEG Device Compatibility & Connection Guide</h2>
+            <ul className="mb-2 list-disc ml-6">
+              <li><b>NeuroSky Mindwave:</b> Fully supported. <span className="text-green-600">Available</span></li>
+              <li><b>Muse:</b> Fully supported. <span className="text-green-600">Available</span></li>
+              <li><b>Naxon Explorer:</b> Fully supported. <span className="text-green-600">Available</span></li>
+              <li><b>DIY/Other:</b> Supported via custom script. <span className="text-green-600">Available</span></li>
+            </ul>
+            <div className="mb-2">
+              <b>How to Connect:</b>
+              <ol className="list-decimal ml-6">
+                <li>Select your EEG device from the dropdown below.</li>
+                <li>Download and run the provided connection script for your device (see README or website).</li>
+                <li>Wait for the status to show <span className="text-green-600">Connected</span> (or check for live emotion updates).</li>
+                <li>Start chatting! The bot will use your live emotion data.</li>
+              </ol>
+            </div>
+            <div className="text-xs text-gray-600">
+              Need help? See the <a href="/connect-eeg" className="underline text-blue-600">Connect Your EEG</a> guide or contact support.
+            </div>
+          </div>
+
           <div className="mb-4">
             <label htmlFor="eeg-device" className="mr-2 font-bold">EEG Device:</label>
             <select
