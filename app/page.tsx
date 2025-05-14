@@ -51,6 +51,23 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
+  // Add WebSocket connection for EEG emotion data
+  useEffect(() => {
+    const ws = new WebSocket('ws://localhost:8765');
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.emotion && typeof data.intensity === 'number') {
+          setEmotion({ emotion: data.emotion, intensity: data.intensity });
+        }
+      } catch (e) {
+        console.error('Invalid EEG emotion data:', event.data);
+      }
+    };
+    ws.onerror = (err) => console.error('WebSocket error:', err);
+    return () => ws.close();
+  }, []);
+
   useEffect(() => {
     if (emotion) {
       switch (emotion.emotion) {
