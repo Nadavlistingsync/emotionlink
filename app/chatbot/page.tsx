@@ -5,6 +5,13 @@ import { useState, useEffect, useRef } from 'react';
 import { EEGProvider, useEEG } from '@/lib/interpretEEG';
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts';
 
+function ClientOnly({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
+  return <>{children}</>;
+}
+
 interface Message {
   role: 'user' | 'assistant';
   content: string;
@@ -146,8 +153,10 @@ function ChatbotInner() {
 
 export default function Chatbot() {
   return (
-    <EEGProvider>
-      <ChatbotInner />
-    </EEGProvider>
+    <ClientOnly>
+      <EEGProvider>
+        <ChatbotInner />
+      </EEGProvider>
+    </ClientOnly>
   );
 } 
