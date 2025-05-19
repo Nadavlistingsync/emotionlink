@@ -25,6 +25,7 @@ function ChatbotInner() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const emotionState = useEEG();
   const [error, setError] = useState<string | null>(null);
+  const [typingIndicator, setTypingIndicator] = useState(false);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -53,6 +54,7 @@ function ChatbotInner() {
     setInput('');
     setIsLoading(true);
     setError(null);
+    setTypingIndicator(true);
 
     try {
       const response = await fetch('/api/chat', {
@@ -67,9 +69,16 @@ function ChatbotInner() {
         }),
       });
 
-      if (!response.ok) throw new Error('Failed to get response');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to get response');
+      }
 
       const data = await response.json();
+      
+      // Simulate natural typing delay
+      await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
+      
       const assistantMessage: Message = { role: 'assistant', content: data.response };
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error: any) {
@@ -77,11 +86,12 @@ function ChatbotInner() {
       setError(error.message || 'Sorry, I encountered an error. Please try again.');
       const errorMessage: Message = {
         role: 'assistant',
-        content: 'Sorry, I encountered an error. Please try again.',
+        content: 'I apologize, but I encountered an error. Please try again.',
       };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
+      setTypingIndicator(false);
     }
   };
 
@@ -89,7 +99,7 @@ function ChatbotInner() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         <div className="bg-white rounded-2xl shadow-2xl p-8 border border-gray-100">
-          <h2 className="text-3xl font-extrabold mb-8 text-center text-blue-700 tracking-tight drop-shadow">AI Chatbot</h2>
+          <h2 className="text-3xl font-extrabold mb-8 text-center text-blue-700 tracking-tight drop-shadow">AI Therapist</h2>
 
           {error && (
             <div className="mb-6 p-4 bg-red-100 border border-red-300 text-red-800 rounded-lg flex items-center justify-between" role="alert">
@@ -119,27 +129,47 @@ function ChatbotInner() {
           {/* Chat UI */}
           <div className="h-96 overflow-y-auto mb-6 bg-gray-50 rounded-lg p-4 border border-gray-200 shadow-inner focus:outline-none">
             {messages.map((msg, idx) => (
-              <div key={idx} className={`mb-2 flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`px-4 py-2 rounded-xl shadow ${msg.role === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-900'} focus:ring-2 focus:ring-blue-400`} tabIndex={0} aria-label={msg.role === 'user' ? 'User message' : 'Assistant message'}>
-                  {msg.content}
+              <div key={idx} className={`mb-4 flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div 
+                  className={`max-w-[80%] px-4 py-2 rounded-xl shadow ${
+                    msg.role === 'user' 
+                      ? 'bg-blue-500 text-white' 
+                      : 'bg-gray-200 text-gray-900'
+                  } focus:ring-2 focus:ring-blue-400`} 
+                  tabIndex={0} 
+                  aria-label={msg.role === 'user' ? 'User message' : 'Assistant message'}
+                >
+                  <p className="whitespace-pre-wrap">{msg.content}</p>
                 </div>
               </div>
             ))}
+            {typingIndicator && (
+              <div className="flex justify-start mb-4">
+                <div className="bg-gray-200 text-gray-900 px-4 py-2 rounded-xl shadow">
+                  <div className="flex space-x-2">
+                    <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                    <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                    <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  </div>
+                </div>
+              </div>
+            )}
             <div ref={messagesEndRef} />
           </div>
+
           <form onSubmit={handleSubmit} className="flex space-x-2">
             <input
               type="text"
-              style={{ background: '#000', color: '#fff', zIndex: 9999, opacity: 1, width: '100%', padding: '12px', border: '2px solid #00f', fontSize: '18px' }}
-              placeholder="Type your message..."
               value={input}
-              onChange={e => { setInput(e.target.value); console.log('Input value:', e.target.value); }}
+              onChange={e => setInput(e.target.value)}
+              placeholder="Type your message..."
+              className="flex-1 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
               disabled={isLoading}
               aria-label="Type your message"
             />
             <button
               type="submit"
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 font-semibold shadow"
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 font-semibold shadow transition-colors duration-200"
               disabled={isLoading}
             >
               {isLoading ? 'Sending...' : 'Send'}
