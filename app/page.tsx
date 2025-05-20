@@ -17,6 +17,9 @@ export default function Home() {
   const [chatMessages, setChatMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeviceConnected, setIsDeviceConnected] = useState(false);
+  const [manualEmotion, setManualEmotion] = useState("neutral");
+  const [manualIntensity, setManualIntensity] = useState(0.5);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [eegDevice, setEegDevice] = useState<EEGDevice>('neurosky');
   const deviceUrls: Record<EEGDevice, string> = {
@@ -52,14 +55,25 @@ export default function Home() {
         const data = JSON.parse(event.data);
         if (data.emotion && typeof data.intensity === 'number') {
           setEmotion({ emotion: data.emotion, intensity: data.intensity });
+          setIsDeviceConnected(true);
         }
       } catch (e) {
         console.error('Invalid EEG emotion data:', event.data);
       }
     };
-    ws.onerror = (err) => console.error('WebSocket error:', err);
+    ws.onerror = (err) => {
+      console.error('WebSocket error:', err);
+      setIsDeviceConnected(false);
+    };
     return () => ws.close();
   }, [eegDevice]);
+
+  // Update emotion state when manual input changes
+  useEffect(() => {
+    if (!isDeviceConnected) {
+      setEmotion({ emotion: manualEmotion, intensity: manualIntensity });
+    }
+  }, [manualEmotion, manualIntensity, isDeviceConnected]);
 
   useEffect(() => {
     if (emotion) {
@@ -202,6 +216,58 @@ export default function Home() {
               </div>
             </div>
           </div>
+
+          {!isDeviceConnected && (
+            <div className="mb-6 p-6 rounded-xl bg-[var(--muted-background)] border border-[var(--border)]">
+              <h2 className="text-xl font-semibold mb-4 text-[var(--primary)]">How are you feeling?</h2>
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="emotion-select" className="block text-sm font-medium mb-2">Select Emotion</label>
+                  <select
+                    id="emotion-select"
+                    value={manualEmotion}
+                    onChange={(e) => setManualEmotion(e.target.value)}
+                    className="input-primary w-full"
+                  >
+                    <option value="happy">Happy</option>
+                    <option value="sad">Sad</option>
+                    <option value="anxious">Anxious</option>
+                    <option value="neutral">Neutral</option>
+                    <option value="excited">Excited</option>
+                    <option value="angry">Angry</option>
+                    <option value="calm">Calm</option>
+                  </select>
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label htmlFor="emotion-intensity" className="text-sm font-medium">
+                      Intensity
+                    </label>
+                    <span className="text-sm text-[var(--muted)]">
+                      {(manualIntensity * 100).toFixed(0)}%
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    id="emotion-intensity"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value={manualIntensity}
+                    onChange={(e) => setManualIntensity(parseFloat(e.target.value))}
+                    style={{ "--value": manualIntensity } as React.CSSProperties}
+                    className="w-full"
+                  />
+                </div>
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--muted-background)] border border-[var(--border)]">
+                  <div className="w-3 h-3 rounded-full bg-[var(--primary)] animate-pulse"></div>
+                  <span className="text-sm font-medium">
+                    {manualEmotion} ({(manualIntensity * 100).toFixed(0)}%)
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="h-[500px] overflow-y-auto mb-6 rounded-xl bg-[var(--muted-background)] p-4 border border-[var(--border)]">
             {chatMessages.map((msg, index) => (
