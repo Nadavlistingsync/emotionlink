@@ -3,25 +3,98 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  --primary: #4F46E5;
+  --primary-dark: #4338CA;
+  --secondary: #7C3AED;
+  --accent: #EC4899;
+  --background: #F9FAFB;
+  --foreground: #111827;
+  --muted: #6B7280;
+  --muted-background: #F3F4F6;
+  --border: #E5E7EB;
+  --success: #10B981;
+  --error: #EF4444;
+  --warning: #F59E0B;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+    --primary: #6366F1;
+    --primary-dark: #4F46E5;
+    --secondary: #8B5CF6;
+    --accent: #F472B6;
+    --background: #111827;
+    --foreground: #F9FAFB;
+    --muted: #9CA3AF;
+    --muted-background: #1F2937;
+    --border: #374151;
+    --success: #34D399;
+    --error: #F87171;
+    --warning: #FBBF24;
   }
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  color: var(--foreground);
+  background: var(--background);
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-4 py-2 bg-[var(--primary)] text-white rounded-lg hover:bg-[var(--primary-dark)] 
+           focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:ring-offset-2 
+           transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2 bg-[var(--secondary)] text-white rounded-lg hover:opacity-90
+           focus:outline-none focus:ring-2 focus:ring-[var(--secondary)] focus:ring-offset-2 
+           transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .input-primary {
+    @apply w-full p-2 border border-[var(--border)] rounded-lg bg-[var(--muted-background)]
+           focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent
+           transition-all duration-200;
+  }
+
+  .card {
+    @apply bg-white dark:bg-[var(--muted-background)] rounded-xl shadow-lg p-6
+           border border-[var(--border)] transition-all duration-200;
+  }
+}
+
+/* Custom animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out forwards;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--muted-background);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
 }

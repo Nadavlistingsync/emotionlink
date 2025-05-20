@@ -1,58 +1,84 @@
-# EmotionLink Chat
+# EmotionLink
 
-A simple emotion-aware chatbot that provides empathetic responses based on the user's current emotional state.
+An emotion-aware chatbot that uses EEG data to provide personalized responses.
 
 ## Features
 
-- Real-time emotion detection (simulated with mock data)
-- Empathetic chat responses using OpenAI's GPT-3.5
-- Clean and intuitive user interface
-- Local storage for chat history
+- Real-time emotion detection using EEG devices
+- Support for multiple EEG devices (NeuroSky, Muse, Naxon, DIY)
+- Modern, responsive UI with dark mode support
+- Secure WebSocket connections
+- Emotion-based response generation
 
-## Tech Stack
+## Prerequisites
 
-- Next.js 14
-- React 18
-- OpenAI API
-- TailwindCSS
-- TypeScript
+- Node.js 18 or higher
+- npm or yarn
+- EEG device (optional - can run in demo mode)
 
-## Getting Started
+## Environment Variables
 
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/emotionlink.git
-cd emotionlink
+Create a `.env.local` file in the root directory with the following variables:
+
+```env
+NEXT_PUBLIC_WS_URL=wss://your-websocket-server.com
 ```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Create a `.env.local` file in the root directory and add your OpenAI API key:
-```bash
-OPENAI_API_KEY=your_openai_api_key
-```
-
-4. Run the development server:
-```bash
-npm run dev
-```
-
-5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Development
 
-- `npm run dev` - Start the development server
-- `npm run build` - Build the production application
-- `npm run start` - Start the production server
-- `npm run lint` - Run ESLint
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Run the development server:
+   ```bash
+   npm run dev
+   ```
+
+3. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Deployment
+
+### Deploying to Vercel
+
+1. Push your code to GitHub
+2. Import your repository in Vercel
+3. Configure the following environment variables in Vercel:
+   - `NEXT_PUBLIC_WS_URL`
+4. Deploy!
+
+### Manual Deployment
+
+1. Build the application:
+   ```bash
+   npm run build
+   ```
+
+2. Start the production server:
+   ```bash
+   npm start
+   ```
+
+## Testing
+
+Run the test suite:
+```bash
+npm test
+```
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. 
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+For support, email support@emotionlink.com or open an issue in the GitHub repository. 

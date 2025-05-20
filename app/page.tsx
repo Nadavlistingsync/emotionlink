@@ -153,88 +153,91 @@ export default function Home() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-4 md:p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm">
-        <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl mx-auto">
-          <div className="mb-4">
-            <h1 className="text-2xl font-bold text-black">EmotionLink Chat</h1>
+    <main className="min-h-screen bg-gradient-to-br from-[var(--background)] to-[var(--muted-background)] p-4 md:p-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="card animate-slide-in">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] bg-clip-text text-transparent">
+                EmotionLink
+              </h1>
+              <p className="text-[var(--muted)] mt-1">Your emotion-aware chatbot</p>
+            </div>
             {emotion && (
-              <p className="text-black">
-                Current emotion: {emotion.emotion} (Intensity: {(emotion.intensity * 100).toFixed(0)}%)
-              </p>
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--muted-background)]">
+                <div className="w-3 h-3 rounded-full bg-[var(--primary)] animate-pulse"></div>
+                <span className="text-sm font-medium">
+                  {emotion.emotion} ({(emotion.intensity * 100).toFixed(0)}%)
+                </span>
+              </div>
             )}
           </div>
-          
-          <div className="mb-4 p-6 border rounded-lg bg-white shadow text-black text-base font-sans leading-relaxed">
-            <h2 className="font-bold mb-3 text-lg">EEG Device Compatibility & Connection Guide</h2>
-            <ul className="mb-3 list-disc ml-8 space-y-1">
-              <li><b>NeuroSky Mindwave:</b> Fully supported. <span className="text-green-700 font-semibold">Available</span></li>
-              <li><b>Muse:</b> Fully supported. <span className="text-green-700 font-semibold">Available</span></li>
-              <li><b>Naxon Explorer:</b> Fully supported. <span className="text-green-700 font-semibold">Available</span></li>
-              <li><b>DIY/Other:</b> Supported via custom script. <span className="text-green-700 font-semibold">Available</span></li>
-            </ul>
-            <div className="mb-3">
-              <b>How to Connect:</b>
-              <ol className="list-decimal ml-8 space-y-1">
-                <li>Select your EEG device from the dropdown below.</li>
-                <li>Download and run the provided connection script for your device (see README or website).</li>
-                <li>Wait for the status to show <span className="text-green-700 font-semibold">Connected</span> (or check for live emotion updates).</li>
-                <li>Start chatting! The bot will use your live emotion data.</li>
-              </ol>
-            </div>
-            <div className="text-sm text-gray-700 mt-2">
-              Need help? See the <a href="/connect-eeg" className="underline text-blue-700 font-semibold">Connect Your EEG</a> guide or contact support.
+
+          <div className="mb-6 p-6 rounded-xl bg-[var(--muted-background)] border border-[var(--border)]">
+            <h2 className="text-xl font-semibold mb-4 text-[var(--primary)]">EEG Device Setup</h2>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="eeg-device" className="block text-sm font-medium mb-2">Select Device</label>
+                <select
+                  id="eeg-device"
+                  value={eegDevice}
+                  onChange={e => setEegDevice(e.target.value as EEGDevice)}
+                  className="input-primary"
+                  aria-label="Select EEG device"
+                >
+                  <option value="neurosky">NeuroSky Mindwave</option>
+                  <option value="muse">Muse</option>
+                  <option value="naxon">Naxon Explorer</option>
+                  <option value="diy">DIY/Other</option>
+                </select>
+              </div>
+              <div className="flex items-end">
+                <a
+                  href="/eeg-connection"
+                  className="btn-secondary w-full text-center"
+                  aria-label="View connection guide"
+                >
+                  Connection Guide
+                </a>
+              </div>
             </div>
           </div>
 
-          <div className="mb-4">
-            <label htmlFor="eeg-device" className="mr-2 font-bold">EEG Device:</label>
-            <select
-              id="eeg-device"
-              value={eegDevice}
-              onChange={e => setEegDevice(e.target.value as EEGDevice)}
-              className="p-2 border rounded-lg"
-            >
-              <option value="neurosky">NeuroSky Mindwave</option>
-              <option value="muse">Muse</option>
-              <option value="naxon">Naxon Explorer</option>
-              <option value="diy">DIY/Other</option>
-            </select>
-            <div className="mt-2 text-blue-700 font-semibold">
-              Selected device: {(() => {
-                switch (eegDevice) {
-                  case 'neurosky': return 'NeuroSky Mindwave';
-                  case 'muse': return 'Muse';
-                  case 'naxon': return 'Naxon Explorer';
-                  case 'diy': return 'DIY/Other';
-                  default: return eegDevice;
-                }
-              })()}
-            </div>
-          </div>
-
-          <div className="h-[500px] overflow-y-auto mb-4 border rounded-lg p-4 bg-gray-50">
+          <div className="h-[500px] overflow-y-auto mb-6 rounded-xl bg-[var(--muted-background)] p-4 border border-[var(--border)]">
             {chatMessages.map((msg, index) => (
               <div
                 key={index}
-                className={`mb-4 ${
+                className={`mb-4 animate-slide-in ${
                   msg.role === 'user' ? 'text-right' : 'text-left'
                 }`}
               >
                 <div
-                  className={`inline-block p-3 rounded-lg ${
+                  className={`inline-block p-4 rounded-2xl max-w-[80%] ${
                     msg.role === 'user'
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-200 text-black'
+                      ? 'bg-[var(--primary)] text-white'
+                      : 'bg-white dark:bg-[var(--muted-background)] text-[var(--foreground)]'
                   }`}
+                  role="message"
+                  aria-label={`${msg.role === 'user' ? 'Your' : 'Assistant'} message`}
                 >
-                  <p>{msg.content}</p>
-                  <span className="text-xs opacity-75">
+                  <p className="whitespace-pre-wrap">{msg.content}</p>
+                  <span className="text-xs opacity-75 mt-2 block">
                     {formatTime(msg.timestamp)}
                   </span>
                 </div>
               </div>
             ))}
+            {isLoading && (
+              <div className="flex justify-start mb-4 animate-slide-in">
+                <div className="bg-white dark:bg-[var(--muted-background)] p-4 rounded-2xl">
+                  <div className="flex space-x-2">
+                    <div className="w-2 h-2 bg-[var(--primary)] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                    <div className="w-2 h-2 bg-[var(--primary)] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                    <div className="w-2 h-2 bg-[var(--primary)] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  </div>
+                </div>
+              </div>
+            )}
             <div ref={messagesEndRef} />
           </div>
 
@@ -245,13 +248,15 @@ export default function Home() {
               onChange={(e) => setInputMessage(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
               placeholder="Type your message..."
-              className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+              className="input-primary"
               disabled={isLoading}
+              aria-label="Message input"
             />
             <button
               onClick={handleSendMessage}
               disabled={isLoading}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              className="btn-primary whitespace-nowrap"
+              aria-label={isLoading ? 'Sending message...' : 'Send message'}
             >
               {isLoading ? 'Sending...' : 'Send'}
             </button>
