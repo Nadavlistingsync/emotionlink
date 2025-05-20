@@ -15,6 +15,7 @@ export default function EEGConnection() {
   const [isConnecting, setIsConnecting] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [deviceStatus, setDeviceStatus] = useState('Not Connected');
+  const [eegDevice, setEegDevice] = useState<EEGDevice>('neurosky');
 
   const handleConnect = async () => {
     setIsConnecting(true);
@@ -68,7 +69,8 @@ export default function EEGConnection() {
       setDeviceStatus('Connected');
     } catch (error) {
       console.error('Connection error:', error);
-      setDeviceStatus(`Connection failed: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      setDeviceStatus(`Connection failed: ${errorMessage}`);
     } finally {
       setIsConnecting(false);
     }
