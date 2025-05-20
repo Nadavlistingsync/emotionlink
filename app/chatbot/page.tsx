@@ -69,12 +69,15 @@ function ChatbotInner() {
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to get response');
+        throw new Error(data.error || 'Failed to get response');
       }
 
-      const data = await response.json();
+      if (!data.response) {
+        throw new Error('No response received from the AI');
+      }
       
       // Simulate natural typing delay
       await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
@@ -83,12 +86,22 @@ function ChatbotInner() {
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error: any) {
       console.error('Error:', error);
-      setError(error.message || 'Sorry, I encountered an error. Please try again.');
-      const errorMessage: Message = {
+      let errorMessage = 'Sorry, I encountered an error. Please try again.';
+      
+      if (error.message.includes('AI service is not properly configured')) {
+        errorMessage = 'The AI service is not properly configured. Please contact support.';
+      } else if (error.message.includes('Error communicating with AI service')) {
+        errorMessage = 'Having trouble connecting to the AI service. Please try again in a moment.';
+      } else if (error.message.includes('No response received')) {
+        errorMessage = 'The AI service is not responding. Please try again.';
+      }
+      
+      setError(errorMessage);
+      const errorMessageObj: Message = {
         role: 'assistant',
-        content: 'I apologize, but I encountered an error. Please try again.',
+        content: errorMessage,
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages(prev => [...prev, errorMessageObj]);
     } finally {
       setIsLoading(false);
       setTypingIndicator(false);

@@ -1,43 +1,67 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Initialize OpenAI with error handling
+let openai: OpenAI;
+try {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error('OPENAI_API_KEY is not set in environment variables');
+  }
+  openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+} catch (error) {
+  console.error('Failed to initialize OpenAI:', error);
+  throw error;
+}
 
-// Error feedback loop with detailed logging
+// Enhanced error feedback loop with detailed logging
 const logError = (error: any, context: string) => {
-  console.error(`[${context}] Error:`, {
+  const errorDetails = {
     message: error.message,
     stack: error.stack,
     timestamp: new Date().toISOString(),
-  });
+    context,
+    type: error.name,
+    code: error.code,
+  };
+  console.error(`[${context}] Error:`, errorDetails);
+  return errorDetails;
 };
 
-// Validate request body
-function validateRequest(body: any): body is { message: string; emotion: string; intensity: number } {
-  return (
-    typeof body === 'object' &&
-    body !== null &&
-    typeof body.message === 'string' &&
-    typeof body.emotion === 'string' &&
-    typeof body.intensity === 'number' &&
-    body.intensity >= 0 &&
-    body.intensity <= 1
-  );
+// Validate request body with detailed error messages
+function validateRequest(body: any): { isValid: boolean; error?: string } {
+  if (typeof body !== 'object' || body === null) {
+    return { isValid: false, error: 'Request body must be an object' };
+  }
+  if (typeof body.message !== 'string') {
+    return { isValid: false, error: 'Message must be a string' };
+  }
+  if (typeof body.emotion !== 'string') {
+    return { isValid: false, error: 'Emotion must be a string' };
+  }
+  if (typeof body.intensity !== 'number') {
+    return { isValid: false, error: 'Intensity must be a number' };
+  }
+  if (body.intensity < 0 || body.intensity > 1) {
+    return { isValid: false, error: 'Intensity must be between 0 and 1' };
+  }
+  return { isValid: true };
 }
 
 export async function POST(request: Request) {
+  const requestId = Math.random().toString(36).substring(7);
+  console.log(`[API/chat] [${requestId}] Incoming request`);
+  
   try {
-    console.log('[API/chat] Incoming request');
-    
     const body = await request.json();
-    console.log('[API/chat] Request body:', body);
+    console.log(`[API/chat] [${requestId}] Request body:`, body);
 
-    if (!validateRequest(body)) {
-      console.warn('[API/chat] Invalid request body');
+    const validation = validateRequest(body);
+    if (!validation.isValid) {
+      console.warn(`[API/chat] [${requestId}] Invalid request:`, validation.error);
       return NextResponse.json(
-        { response: '', error: 'Invalid request format' },
+        { response: '', error: validation.error },
         { status: 400 }
       );
     }
@@ -60,6 +84,8 @@ Your response should:
 
 Format your response in a natural, conversational way.`;
 
+    console.log(`[API/chat] [${requestId}] Sending request to OpenAI`);
+    
     const completion = await openai.chat.completions.create({
       messages: [
         { 
@@ -82,12 +108,42 @@ Format your response in a natural, conversational way.`;
     }
 
     const response = { response: aiResponse };
-    console.log('[API/chat] Response:', response);
+    console.log(`[API/chat] [${requestId}] Successfully generated response`);
     return NextResponse.json(response);
-  } catch (error) {
-    logError(error, 'API/chat');
+  } catch (error: any) {
+    const errorDetails = logError(error, `API/chat [${requestId}]`);
+    
+    // Handle specific OpenAI errors
+    if (error instanceof OpenAI.APIError) {
+      return NextResponse.json(
+        { 
+          response: '', 
+          error: 'Error communicating with AI service',
+          details: errorDetails
+        },
+        { status: 503 }
+      );
+    }
+
+    // Handle environment variable errors
+    if (error.message.includes('OPENAI_API_KEY')) {
+      return NextResponse.json(
+        { 
+          response: '', 
+          error: 'AI service is not properly configured',
+          details: errorDetails
+        },
+        { status: 500 }
+      );
+    }
+
+    // Handle other errors
     return NextResponse.json(
-      { response: '', error: 'Internal server error' },
+      { 
+        response: '', 
+        error: 'Internal server error',
+        details: errorDetails
+      },
       { status: 500 }
     );
   }

@@ -2,6 +2,15 @@
 
 import { useState } from 'react';
 
+type EEGDevice = 'neurosky' | 'muse' | 'naxon' | 'diy';
+
+const deviceUrls: Record<EEGDevice, string> = {
+  neurosky: 'ws://localhost:8765',
+  muse: 'ws://localhost:8766',
+  naxon: 'ws://localhost:8767',
+  diy: 'ws://localhost:8768',
+};
+
 export default function EEGConnection() {
   const [isConnecting, setIsConnecting] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
@@ -12,16 +21,54 @@ export default function EEGConnection() {
     setDeviceStatus('Searching for devices...');
 
     try {
-      // Simulate device connection
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Create WebSocket connection based on selected device
+      const ws = new WebSocket(deviceUrls[eegDevice]);
       
-      // Here you would implement actual EEG device connection logic
-      // For now, we'll simulate a successful connection
+      // Set a timeout for connection
+      const connectionTimeout = setTimeout(() => {
+        ws.close();
+        throw new Error('Connection timeout - No device found');
+      }, 5000);
+
+      // Wait for connection
+      await new Promise((resolve, reject) => {
+        ws.onopen = () => {
+          clearTimeout(connectionTimeout);
+          resolve(true);
+        };
+        ws.onerror = (error) => {
+          clearTimeout(connectionTimeout);
+          reject(new Error('Failed to connect to device'));
+        };
+      });
+
+      // Test if we can receive data
+      const dataTimeout = setTimeout(() => {
+        ws.close();
+        throw new Error('No data received from device');
+      }, 3000);
+
+      await new Promise((resolve, reject) => {
+        ws.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.poorSignalLevel === 200) {
+              reject(new Error('Device not properly connected'));
+            } else {
+              clearTimeout(dataTimeout);
+              resolve(true);
+            }
+          } catch (e) {
+            reject(new Error('Invalid data received from device'));
+          }
+        };
+      });
+
       setIsConnected(true);
       setDeviceStatus('Connected');
     } catch (error) {
       console.error('Connection error:', error);
-      setDeviceStatus('Connection failed. Please try again.');
+      setDeviceStatus(`Connection failed: ${error.message}`);
     } finally {
       setIsConnecting(false);
     }
