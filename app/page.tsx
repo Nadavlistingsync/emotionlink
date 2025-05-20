@@ -96,7 +96,10 @@ export default function Home() {
   }, [emotion, message]);
 
   const handleSendMessage = async () => {
-    if (!inputMessage.trim() || !emotion) return;
+    if (!inputMessage.trim()) return;
+
+    // Use default neutral emotion if none is present
+    const emotionToSend = emotion || { emotion: 'neutral', intensity: 0.5 };
 
     const userMessage: Message = {
       role: 'user',
@@ -116,8 +119,8 @@ export default function Home() {
         },
         body: JSON.stringify({
           message: inputMessage,
-          emotion: emotion.emotion,
-          intensity: emotion.intensity
+          emotion: emotionToSend.emotion,
+          intensity: emotionToSend.intensity
         }),
       });
 
